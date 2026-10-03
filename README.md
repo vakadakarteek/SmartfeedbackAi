@@ -1,4 +1,52 @@
-# SmartFeedback AI Backend
+# Frontend
+
+The React frontend is in `FRONTEND/smartfeedback-ai`. It uses Vite for local development and production builds, and communicates with the backend API described above.
+
+### Run locally
+
+Install dependencies and start the frontend from the repository root:
+
+```powershell
+Set-Location FRONTEND\smartfeedback-ai
+npm ci
+npm run dev
+```
+
+Vite prints the local URL when it starts; the default is `http://localhost:5173`. Start the backend in a separate terminal using the instructions above. The frontend expects the API at `http://localhost:5001/api` by default.
+
+To use a different API URL, create `FRONTEND/smartfeedback-ai/.env.local` with:
+
+```dotenv
+VITE_API_URL=http://localhost:5001/api
+```
+
+Set `VITE_API_URL` to the backend API base URL, including the `/api` prefix. Vite reads this value when starting the dev server or building the app. Values prefixed with `VITE_` are included in browser code; do not put secrets in frontend environment variables.
+
+### Production build
+
+From `FRONTEND/smartfeedback-ai`:
+
+```powershell
+npm run build
+npm run preview
+```
+
+The build output is written to `dist/`. Configure `VITE_API_URL` for the target backend before building a deployment.
+
+## Tests
+
+Run the backend tests with:
+
+```powershell
+npm test
+```
+
+## Security and deployment
+
+- Keep `.env` out of version control. The repository ignores environment files; use `.env.example` as the safe template.
+- Configure a strong, unique `JWT_SECRET` and production MongoDB credentials before deploying.
+- Configure `CLIENT_URL` to the deployed frontend origin.
+- Set real provider credentials before using email, SMS, or AI integrations in production; mock delivery results are not proof that a message was sent.# SmartFeedback AI Backend
 
 The backend API for SmartFeedback AI, an application for generating feedback, managing contacts, sending messages, and viewing engagement analytics.
 
