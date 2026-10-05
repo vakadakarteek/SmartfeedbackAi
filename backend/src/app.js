@@ -16,19 +16,44 @@ import userRoutes from './routes/user.routes.js';
 
 const app = express();
 
-app.use(helmet());
-
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin === env.CLIENT_URL) {
-        return callback(null, true);
-      }
-      callback(new Error('CORS blocked by origin policy'));
-    },
-    credentials: true,
+  helmet({
+    crossOriginResourcePolicy: false,
   })
 );
+
+const isDev = env.NODE_ENV !== 'production';
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // 1. Allow non-browser callers (Postman, curl, server-to-server)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // 2. In development or local testing, allow any localhost, LAN IP (mobile testing on Wi-Fi), or CLIENT_URL
+    if (
+      isDev ||
+      origin === env.CLIENT_URL ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    // 3. Otherwise safely reject without throwing an unhandled exception
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 if (env.NODE_ENV !== 'test') {
   app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
